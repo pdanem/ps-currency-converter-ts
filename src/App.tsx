@@ -1,11 +1,14 @@
-import React from 'react';
+import InputField from './components/InputField';
 
 import './App.css';
 
+import { useState } from 'react';
 import Header from './components/Header';
 import { fetchRates } from './utils/api';
 
 const App = () => {
+  const [inputValue, setInputValue] = useState('');
+
   const handleSubmit = async () => {
     try {
       const rates = await fetchRates('EUR');
@@ -19,6 +22,7 @@ const App = () => {
     <div className="app">
       <div className="app__content">
         <Header />
+        <InputField value={inputValue} handleChange={setInputValue}/>
         <button onClick={handleSubmit}>get rates</button>
       </div>
     </div>
