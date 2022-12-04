@@ -12,6 +12,7 @@ import { parseInput } from './utils/parseInput';
 const App = () => {
   const [inputValue, setInputValue] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [conversionResult, setConversionResult] = useState();
 
   const handleSubmit = async () => {
     try {
@@ -23,6 +24,7 @@ const App = () => {
       );
 
       setErrorMessage('')
+      setConversionResult(result);
     } catch (e: any) {
       setErrorMessage(e.message);
     }
@@ -32,10 +34,10 @@ const App = () => {
     <div className="app">
       <div className="app__content">
         <Grid container direction="column" rowSpacing={2}>
-          <Grid item xs>
+          <Grid item>
             <Header />
           </Grid>
-          <Grid item xs>
+          <Grid item>
             <InputField
               value={inputValue}
               handleChange={setInputValue}
@@ -43,10 +45,13 @@ const App = () => {
           </Grid>
           {
             errorMessage &&
-            <Grid item xs={12}>
+            <Grid item>
               <Alert severity="error">{errorMessage}</Alert>
             </Grid>
           }
+          <Grid item>
+            {conversionResult}
+          </Grid>
         </Grid>
       </div>
     </div>
