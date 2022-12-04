@@ -9,6 +9,7 @@ interface InputFieldProps {
   value?: string;
   handleChange?: (newValue: string) => void;
   handleSubmit?: VoidFunction;
+  disabled?: boolean
 }
 
 const PLACEHOLDER_TEXT = 'e.g. 1 AUD to USD';
@@ -16,11 +17,14 @@ const PLACEHOLDER_TEXT = 'e.g. 1 AUD to USD';
 const InputField: React.FC<InputFieldProps> = ({
   value = '',
   handleChange,
-  handleSubmit
+  handleSubmit,
+  disabled
 }) => {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    handleChange?.(event.target.value ?? '');
+    if (!disabled) {
+      handleChange?.(event.target.value ?? '');
+    }
   }
 
 	return (
@@ -31,9 +35,12 @@ const InputField: React.FC<InputFieldProps> = ({
         (event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           event.stopPropagation();
-          handleSubmit?.();
+          if (!disabled) {
+            handleSubmit?.();
+          }
         }
       }
+      disabled={disabled}
     >
         <OutlinedInput
             value={value}
@@ -41,7 +48,7 @@ const InputField: React.FC<InputFieldProps> = ({
             placeholder={PLACEHOLDER_TEXT}
             fullWidth
             endAdornment={<InputAdornment position="end">
-              <IconButton type="submit">
+              <IconButton type="submit" disabled={disabled}>
                   <SearchIcon />
               </IconButton>
             </InputAdornment>}

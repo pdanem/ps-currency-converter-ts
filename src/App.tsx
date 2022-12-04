@@ -5,7 +5,7 @@ import './App.css';
 
 import Alert from '@mui/material/Alert/Alert';
 import Grid from '@mui/material/Grid/Grid';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Header from './components/Header';
 import { ConversionResult } from './types/conversionResults';
 import { convertCurrency, fetchSymbols } from './utils/api';
@@ -16,8 +16,10 @@ const App = () => {
   const [inputValue, setInputValue] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [conversionResult, setConversionResult] = useState<ConversionResult>();
+  const [conversionLoading, setConversionLoading] = useState(false);
   const [symbols, setSymbols] = useState<Record<string, string>>();
   const [symbolsLoading, setSymbolsLoading] = useState(true);
+  const disableUserInputs = useMemo(() => conversionLoading || symbolsLoading, [conversionLoading, symbolsLoading])
 
   useEffect(() => {
     setSymbolsLoading(true);
@@ -29,8 +31,14 @@ const App = () => {
   }, [setSymbolsLoading])
 
   const handleSubmit = async () => {
+    setConversionLoading(true);
+    await processUserInput(inputValue);
+    setConversionLoading(false);
+  };
+
+  const processUserInput = async (userInputString: string) => {
     try {
-      const inputToken = parseInput(inputValue);
+      const inputToken = parseInput(userInputString);
       const result = await convertCurrency(
         inputToken.fromCurrency,
         inputToken.toCurrency,
@@ -43,11 +51,23 @@ const App = () => {
         baseAmount: inputToken.fromAmount,
         baseName: symbols?.[inputToken.fromCurrency.toUpperCase()] ?? inputToken.fromCurrency,
         targetName: symbols?.[inputToken.toCurrency.toUpperCase()] ?? inputToken.toCurrency,
+        baseSymbol: inputToken.fromCurrency,
+        targetSymbol: inputToken.toCurrency
       });
     } catch (e: any) {
       setErrorMessage(e.message);
     }
-  };
+
+  }
+
+  const handleReversal = async () => {
+      setConversionLoading(true);
+      const { baseSymbol, convertedAmount, targetSymbol } = conversionResult as ConversionResult;
+      const reversedInputString = `${Number(convertedAmount).toFixed(2)} ${targetSymbol} to ${baseSymbol}`
+      setInputValue(reversedInputString);
+      await processUserInput(reversedInputString);
+      setConversionLoading(false);
+  }
 
   return (
     <div className="app">
@@ -60,7 +80,8 @@ const App = () => {
             <InputField
               value={inputValue}
               handleChange={setInputValue}
-              handleSubmit={handleSubmit}/>
+              handleSubmit={handleSubmit}
+              disabled={disableUserInputs}/>
           </Grid>
           {
             errorMessage &&
@@ -69,9 +90,9 @@ const App = () => {
             </Grid>
           }
           {
-            conversionResult &&
+            (conversionResult && !errorMessage) &&
             <Grid item>
-              <ResultsField result={conversionResult}/>
+              <ResultsField result={conversionResult} handleReversal={handleReversal} disabled={disableUserInputs}/>
             </Grid>
           }
         </Grid>

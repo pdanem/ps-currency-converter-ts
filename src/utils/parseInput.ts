@@ -11,7 +11,7 @@ const throwInvalidInputError = () => {
 export const parseInput: ParseInput = (input) => {
   // expected input: 1 EUR to USD
   // TODO: parse or tokenize the input string
-  const initialRegexp = /^\d*(\.\d)*\s+([a-z])+\s+to\s([a-z])+/ig;
+  const initialRegexp = /^\d*(\.\d*){0,1}\s+([a-z])+\s+to\s([a-z])+/ig;
   const matchesFormat = initialRegexp.test(input);
   if (!matchesFormat) {
     throwInvalidInputError();

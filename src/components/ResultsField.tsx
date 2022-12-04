@@ -4,13 +4,23 @@ import React from "react";
 import { ConversionResult } from '../types/conversionResults';
 
 interface ResultsFieldProps {
-  result: ConversionResult
+  result: ConversionResult,
+  handleReversal?: VoidFunction,
+  disabled?: boolean
 }
 
 const ResultsField: React.FC<ResultsFieldProps> = ({
-  result
+  result,
+  handleReversal,
+  disabled
 }) => {
   const {baseAmount, baseName, convertedAmount, targetName} = result;
+
+  const handleClick = () =>{
+    if(!disabled) {
+      handleReversal?.();
+    }
+  }
 
 	return (
     <Grid container component={Card} variant="outlined" alignItems="center" direction="row" justifyContent="space-between" sx={{ p: 2 }}>
@@ -19,7 +29,7 @@ const ResultsField: React.FC<ResultsFieldProps> = ({
         <Grid item component={Typography} variant="body1" fontWeight={600}>{`${Number(convertedAmount).toFixed(2)} ${targetName}`}</Grid>
       </Grid>
       <Grid item>
-        <IconButton>
+        <IconButton onClick={handleClick} disabled={disabled}>
           <SwapVert />
         </IconButton>
       </Grid>
