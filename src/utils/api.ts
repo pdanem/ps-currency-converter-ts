@@ -1,5 +1,11 @@
-// https://exchangeratesapi.io/
-// const BASE_URL = 'http://api.exchangeratesapi.io/v1';
+/*
+ * Replaced the original endpoint with
+ * what seems to be a more appropriate currency
+ * conversion endpoint provided by the API
+ * 
+ * Reference: https://apilayer.com/marketplace/exchangerates_data-api 
+ */
+
 const BASE_URL = 'https://api.apilayer.com/exchangerates_data';
 const API_KEY = 'mDaQu4Rj25eHH0Hx9moMsIkOU1pk6oTh'
 
@@ -7,9 +13,11 @@ const API_KEY = 'mDaQu4Rj25eHH0Hx9moMsIkOU1pk6oTh'
 type API = (params: {
   endpoint: string,
   params: {
-    base?: string,
+    from: string,
+    to: string,
+    amount: string
   },
-}) => Promise<any>;
+}) => Promise<Response>;
 
 const api: API = ({ endpoint, params = {} }) => {
   const searchParams = new URLSearchParams(params);
@@ -29,22 +37,35 @@ const api: API = ({ endpoint, params = {} }) => {
   return fetch(`${BASE_URL}${endpoint}?${queryString}`, requestOptions);
 };
 
-export const fetchRates = async (baseCurrency: string) => {
+export const convertCurrency = async (fromCurrency: string, toCurrency: string, amount: string) => {
   try {
-    const response = await api({ endpoint: '/latest', params: { base: baseCurrency } });
+    const response = await api({ endpoint: '/convert',
+      params: {
+        from: fromCurrency,
+        to: toCurrency,
+        amount: amount
+      }
+    });
     const responseText = await response.text();
-    const { rates, error } = JSON.parse(responseText);
+    const { result, success, error } = JSON.parse(responseText);
 
     if (error) {
-      throw new Error(error);
+      throw new Error(error.code);
     }
 
-    if (!rates || !Object.keys(rates).length) {
-      throw new Error('Could not fetch rates.');
+    if (!success || !result) {
+      throw new Error('Could not convert currency.');
     }
 
-    return rates;
-  } catch (errorResponse) {
+    return result;
+  } catch (errorResponse: any) {
+    if (errorResponse.message === 'invalid_to_currency') {
+      throw new Error(`Target '${toCurrency}' is not supported.`)
+    }
+    if (errorResponse.message === 'invalid_from_currency') {
+      throw new Error(`Base '${fromCurrency}' is not supported.`)
+    }
+
     throw errorResponse;
   }
 };

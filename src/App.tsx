@@ -6,9 +6,8 @@ import Alert from '@mui/material/Alert/Alert';
 import Grid from '@mui/material/Grid/Grid';
 import { useState } from 'react';
 import Header from './components/Header';
-import { fetchRates } from './utils/api';
+import { convertCurrency } from './utils/api';
 import { parseInput } from './utils/parseInput';
-import { verifyInputCurrency } from './utils/verifyInputCurrency';
 
 const App = () => {
   const [inputValue, setInputValue] = useState('');
@@ -17,17 +16,12 @@ const App = () => {
   const handleSubmit = async () => {
     try {
       const inputToken = parseInput(inputValue);
-      const rates = await fetchRates('EUR');
-      const validCurrencies = Object.keys(rates);
-      const hasValidBaseCurrency = verifyInputCurrency(inputToken.fromCurrency, validCurrencies);
-      const hasValidTargetCurrency = verifyInputCurrency(inputToken.toCurrency, validCurrencies);
+      const result = await convertCurrency(
+        inputToken.fromCurrency,
+        inputToken.toCurrency,
+        inputToken.fromAmount.toString()
+      );
 
-      if (!hasValidBaseCurrency) {
-        throw new Error(`Base '${inputToken.fromCurrency}' is not supported.`);
-      }
-      if (!hasValidTargetCurrency) {
-        throw new Error(`Target '${inputToken.toCurrency}' is not supported.`);
-      }
       setErrorMessage('')
     } catch (e: any) {
       setErrorMessage(e.message);
