@@ -21,7 +21,7 @@ export const parseInput: ParseInput = (input) => {
 
   return {
     fromAmount: +fromAmount,
-    fromCurrency: fromCurrency,
-    toCurrency: toCurrency,
+    fromCurrency: fromCurrency.toUpperCase(),
+    toCurrency: toCurrency.toUpperCase(),
   };
 };
