@@ -1,19 +1,22 @@
 import SearchIcon from '@mui/icons-material/Search';
+import { IconButton } from '@mui/material';
 import FormControl from '@mui/material/FormControl/FormControl';
 import InputAdornment from "@mui/material/InputAdornment/InputAdornment";
 import OutlinedInput from "@mui/material/OutlinedInput/OutlinedInput";
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, FormEvent } from "react";
 
 interface InputFieldProps {
   value?: string;
   handleChange?: (newValue: string) => void;
+  handleSubmit?: VoidFunction;
 }
 
 const PLACEHOLDER_TEXT = 'e.g. 1 AUD to USD';
 
 const InputField: React.FC<InputFieldProps> = ({
   value = '',
-  handleChange
+  handleChange,
+  handleSubmit
 }) => {
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -21,14 +24,26 @@ const InputField: React.FC<InputFieldProps> = ({
   }
 
 	return (
-		<FormControl fullWidth sx={{ m: 1 }}>
+		<FormControl
+      component="form"
+      fullWidth
+      onSubmit={
+        (event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          event.stopPropagation();
+          handleSubmit?.();
+        }
+      }
+    >
         <OutlinedInput
-            id="outlined-adornment-amount"
             value={value}
             onChange={handleInputChange}
             placeholder={PLACEHOLDER_TEXT}
+            fullWidth
             endAdornment={<InputAdornment position="end">
-              <SearchIcon />
+              <IconButton type="submit">
+                  <SearchIcon />
+              </IconButton>
             </InputAdornment>}
         />
     </FormControl>

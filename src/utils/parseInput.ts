@@ -4,13 +4,24 @@ type ParseInput = (input: string) => {
   toCurrency: string
 }
 
+const throwInvalidInputError = () => {
+  throw new Error("Invalid input structure");
+}
+
 export const parseInput: ParseInput = (input) => {
   // expected input: 1 EUR to USD
   // TODO: parse or tokenize the input string
+  const initialRegexp = /^\d*(\.\d)*\s+([a-z])+\s+to\s([a-z])+/ig;
+  const matchesFormat = initialRegexp.test(input);
+  if (!matchesFormat) {
+    throwInvalidInputError();
+  }
+
+  const [fromAmount, fromCurrency, , toCurrency] = input.split(/\s/g);
 
   return {
-    fromAmount: 0,
-    fromCurrency: '',
-    toCurrency: '',
+    fromAmount: +fromAmount,
+    fromCurrency: fromCurrency,
+    toCurrency: toCurrency,
   };
 };
